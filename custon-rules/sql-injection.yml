@@ -1,0 +1,38 @@
+rules:
+  - id: sql-fstring-injection
+    languages:
+      - python
+
+    severity: ERROR
+
+    message: >-
+      Possible SQL injection detected. An f-string is being passed to a SQL
+      execution function. Use a parameterized query instead.
+
+    metadata:
+      category: security
+      technology:
+        - python
+        - sql
+      cwe:
+        - "CWE-89: SQL Injection"
+      confidence: HIGH
+      likelihood: HIGH
+      impact: HIGH
+
+    mode: taint
+
+    pattern-sources:
+      - pattern-either:
+          - pattern: f"..."
+          - pattern: F"..."
+          - pattern: rf"..."
+          - pattern: fr"..."
+
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $DB.execute($QUERY, ...)
+              - pattern: $DB.executemany($QUERY, ...)
+              - pattern: $DB.executescript($QUERY, ...)
+          - focus-metavariable: $QUERY
